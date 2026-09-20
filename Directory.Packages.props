@@ -6,7 +6,7 @@
 
     <DotNetRuntimeVersion>10.0.12</DotNetRuntimeVersion>
     <DotNetExtensionsVersion>10.10.0</DotNetExtensionsVersion>
-    <AspireVersion>13.5.3</AspireVersion>
+    <AspireVersion>13.5.4</AspireVersion>
     <OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
   </PropertyGroup>
 
