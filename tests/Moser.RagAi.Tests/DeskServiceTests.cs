@@ -116,7 +116,7 @@ public class GeminiGeneratorTests
         Assert.DoesNotContain("swordfish", system);
         Assert.Contains("swordfish", user);
         Assert.Equal("test-key", handler.ApiKey);
-        Assert.Contains("gemini-3.8-flash", handler.Path, StringComparison.Ordinal);
+        Assert.Contains(GeminiAnswerGenerator.DefaultModel, handler.Path, StringComparison.Ordinal);
     }
 
     [Fact]

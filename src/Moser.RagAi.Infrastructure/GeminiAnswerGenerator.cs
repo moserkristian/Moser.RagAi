@@ -5,7 +5,7 @@ namespace Moser.RagAi;
 
 public sealed class GeminiAnswerGenerator : IAnswerGenerator
 {
-    public const string DefaultModel = "gemini-3.8-flash";
+    public const string DefaultModel = "gemini-3.6-flash";
 
     private readonly HttpClient _http;
     private readonly string _model;

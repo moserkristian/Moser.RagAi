@@ -40,11 +40,11 @@ dotnet test
 
 Retrieval uses a local MiniLM model (`Xenova/all-MiniLM-L6-v2`, 384 dimensions, Apache-2.0). It does not call a paid embeddings API.
 
-Answers are generated with `gemini-3.8-flash` on the Gemini API. The key is `GEMINI_API_KEY`.
+Answers are generated with `gemini-3.6-flash` on the Gemini API. The key is `GEMINI_API_KEY`.
 
 Llama 3.3 70B is no longer on Groq's free tier. Groq removed `llama-3.3-70b-versatile` for free and developer accounts on 16 August 2026. Groq's current free replacement, `openai/gpt-oss-120b`, is limited to 30 requests per minute, 1,000 requests per day, 8,000 tokens per minute, and 200,000 tokens per day. Eight thousand tokens a minute is tight once a prompt includes several passages.
 
-`gemini-3.8-flash` is the current Flash model. On 17 October 2026 the Gemini pricing page lists standard input and output as free of charge on the free tier. Free-tier prompts may be used by Google to improve its products. Google does not publish a fixed requests-per-minute number for this model. The limit is per project and is shown in AI Studio. Specified limits are not guaranteed. When the API returns 429, the desk says the model is rate limited and does not invent an answer.
+`gemini-3.8-flash` is listed, and a GET for that model returns HTTP 200. `generateContent` for `gemini-3.8-flash` and `gemini-3.7-flash` sends no response headers. On 17 October 2026 a short request with thinking set to low waited 120 seconds and received 0 bytes. The same request to `gemini-3.6-flash` returned HTTP 200. The pricing page lists standard input and output for `gemini-3.5-flash` as free of charge, and Google routes those calls to `gemini-3.6-flash`. Free-tier prompts may be used by Google to improve its products. Google does not publish a fixed requests-per-minute number. The limit is per project and is shown in AI Studio. Specified limits are not guaranteed. When the API returns 429, the desk says the model is rate limited and does not invent an answer.
 
 The model is told to use only the numbered passages. Those passages are sent as data, separate from the instructions. If retrieval finds nothing close enough, the model is not called.
 

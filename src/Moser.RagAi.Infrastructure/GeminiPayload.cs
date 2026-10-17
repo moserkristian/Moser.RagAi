@@ -22,7 +22,6 @@ public static class GeminiPayload
             },
             generationConfig = new
             {
-                temperature = 0,
                 thinkingConfig = new
                 {
                     thinkingLevel = "low"
