@@ -1,0 +1,30 @@
+@inherits LayoutComponentBase
+
+<a class="skip" href="#content">Skip to content</a>
+<div class="scene">
+    <div class="sheet">
+        <header class="top">
+            <a class="mark" href="/">Document desk</a>
+            <nav aria-label="Primary">
+                <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink>
+                <NavLink href="/desk">Desk</NavLink>
+            </nav>
+            <div class="account">
+                <AuthorizeView>
+                    <Authorized>
+                        <form method="post" action="/account/sign-out" data-enhance="false">
+                            <AntiforgeryToken />
+                            <button type="submit">Sign out</button>
+                        </form>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a class="pill" href="/sign-in">Sign in</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </header>
+        <main id="content">
+            @Body
+        </main>
+    </div>
+</div>

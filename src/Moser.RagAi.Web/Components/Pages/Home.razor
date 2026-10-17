@@ -1,0 +1,35 @@
+@page "/"
+
+<PageTitle>Document desk</PageTitle>
+
+<section class="hero">
+    <div>
+        <h1>Ask the documents you already have</h1>
+        <p class="lead">Upload a policy, an SOP, or a short contract. The desk answers from those pages and shows the passage. If they do not say it, the desk says so.</p>
+        <form class="ask-row" action="/desk" method="get">
+            <div class="field">
+                <label for="question">Question</label>
+                <input id="question" name="q" type="text" maxlength="1000" autocomplete="off" placeholder="How many days of paid leave?" />
+            </div>
+            <button type="submit">Open the desk</button>
+        </form>
+        <p class="note">Sample files in the repository are fictional.</p>
+    </div>
+    <div class="stage" aria-hidden="true">
+        <div class="float float-dial">
+            <div class="dial"></div>
+            <p>Cited passage</p>
+        </div>
+        <div class="float float-note">
+            <p class="kicker">Answer</p>
+            <p>20 days of paid leave.</p>
+            <div class="bar"></div>
+        </div>
+        <div class="float float-list">
+            <p class="kicker">Documents</p>
+            <div class="row">Leave policy</div>
+            <div class="row selected">Expense SOP</div>
+            <div class="row">Contractor agreement</div>
+        </div>
+    </div>
+</section>

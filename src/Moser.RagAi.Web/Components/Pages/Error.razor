@@ -1,0 +1,21 @@
+@page "/Error"
+@using System.Diagnostics
+
+<PageTitle>Error</PageTitle>
+
+<h1>Something went wrong</h1>
+<p class="lead">The desk could not finish that request.</p>
+@if (!string.IsNullOrEmpty(RequestId))
+{
+    <p class="hint">Request ID: <code>@RequestId</code></p>
+}
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+
+    protected override void OnInitialized() =>
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}

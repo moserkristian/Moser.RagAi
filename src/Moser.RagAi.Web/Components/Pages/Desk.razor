@@ -1,0 +1,267 @@
+@page "/desk"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Desk</PageTitle>
+
+<div class="work">
+    <section aria-labelledby="documents-heading">
+        <h1 id="documents-heading">Documents</h1>
+        <p class="hint">PDF, text, or Markdown. Up to @Limits.MaxUploadMegabytes MB. A scan with no text layer is rejected.</p>
+        <form class="stack" @onsubmit="UploadAsync" @onsubmit:preventDefault="true">
+            <div class="field">
+                <label for="file">File</label>
+                <InputFile id="file" OnChange="SelectFile" accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" />
+            </div>
+            <button type="submit" disabled="@(_uploading || _pending is null)">Upload</button>
+        </form>
+        @if (!string.IsNullOrEmpty(_notice))
+        {
+            <p class="status" role="status">@_notice</p>
+        }
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <p class="alert" role="alert">@_error</p>
+        }
+        @if (_documents.Count == 0)
+        {
+            <p class="hint">Nothing stored yet.</p>
+        }
+        else
+        {
+            <ul class="doc-list">
+                @foreach (var document in _documents)
+                {
+                    <li>
+                        <div>
+                            <p class="doc-title">
+                                @document.Title
+                                @if (document.IsSample)
+                                {
+                                    <span class="tag">Sample</span>
+                                }
+                            </p>
+                            <p class="hint">@document.FileName · @document.UploadedAt.ToString("yyyy-MM-dd")</p>
+                        </div>
+                        <button type="button" aria-label="Remove @document.Title" @onclick="() => RemoveAsync(document.Id)">Remove</button>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+    <section aria-labelledby="ask-heading">
+        <h2 id="ask-heading">Ask</h2>
+        <form class="stack" @onsubmit="AskAsync" @onsubmit:preventDefault="true">
+            <div class="field">
+                <label for="ask-question">Question</label>
+                <textarea id="ask-question" @bind="_question" @bind:event="oninput" maxlength="1000" rows="5"></textarea>
+            </div>
+            <button type="submit" disabled="@(_asking || string.IsNullOrWhiteSpace(_question))">Ask</button>
+        </form>
+        @if (_asking)
+        {
+            <p class="status" role="status">Looking through the documents.</p>
+        }
+        @if (_result is not null)
+        {
+            <div class="answer" aria-live="polite">
+                @if (_result.Answer.Kind == DeskAnswerKind.Answered)
+                {
+                    <h3>Answer</h3>
+                    <p>@_result.Answer.Message</p>
+                    <h3>Passages</h3>
+                    <ul class="citations">
+                        @foreach (var citation in _result.Answer.Citations)
+                        {
+                            <li>
+                                <p class="doc-title">
+                                    @citation.Title
+                                    @if (citation.IsSample)
+                                    {
+                                        <span class="tag">Sample</span>
+                                    }
+                                    @if (citation.PageNumber is int pageNumber)
+                                    {
+                                        <span class="hint">Page @pageNumber</span>
+                                    }
+                                </p>
+                                <blockquote>@citation.Text</blockquote>
+                            </li>
+                        }
+                    </ul>
+                }
+                else if (_result.Answer.Kind == DeskAnswerKind.NotConfigured)
+                {
+                    <h3>No generated answer</h3>
+                    <p>@_result.Answer.Message</p>
+                    @if (_result.Matches.Count > 0)
+                    {
+                        <h3>Retrieved passages</h3>
+                        <p class="hint">These matches are from retrieval. They are not a generated answer.</p>
+                        <ul class="citations">
+                            @foreach (var match in _result.Matches)
+                            {
+                                <li>
+                                    <p class="doc-title">
+                                        @match.Title
+                                        @if (match.IsSample)
+                                        {
+                                            <span class="tag">Sample</span>
+                                        }
+                                    </p>
+                                    <blockquote>@match.Text</blockquote>
+                                </li>
+                            }
+                        </ul>
+                    }
+                }
+                else
+                {
+                    <h3>No answer</h3>
+                    <p>@_result.Answer.Message</p>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? QuestionQuery { get; set; }
+
+    [Inject]
+    public required DeskService Service { get; set; }
+
+    [Inject]
+    public required DeskLimits Limits { get; set; }
+
+    [Inject]
+    public required AuthenticationStateProvider Authentication { get; set; }
+
+    [Inject]
+    public required ILogger<Desk> Logger { get; set; }
+
+    private readonly List<StoredDocument> _documents = [];
+    private byte[]? _pending;
+    private string? _pendingName;
+    private string _question = "";
+    private string? _notice;
+    private string? _error;
+    private bool _uploading;
+    private bool _asking;
+    private AskResult? _result;
+    private string _user = "staff";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(QuestionQuery))
+            _question = QuestionQuery.Length > DeskService.MaxQuestionLength
+                ? QuestionQuery[..DeskService.MaxQuestionLength]
+                : QuestionQuery;
+
+        var state = await Authentication.GetAuthenticationStateAsync();
+        _user = state.User.Identity?.Name ?? "staff";
+        await ReloadAsync();
+    }
+
+    private async Task SelectFile(InputFileChangeEventArgs change)
+    {
+        _error = null;
+        _notice = null;
+        _pending = null;
+        _pendingName = null;
+        try
+        {
+            await using var stream = change.File.OpenReadStream(Limits.MaxUploadBytes);
+            using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer);
+            _pending = buffer.ToArray();
+            _pendingName = change.File.Name;
+        }
+        catch (IOException)
+        {
+            _error = $"That file is larger than {Limits.MaxUploadMegabytes} MB.";
+        }
+    }
+
+    private async Task UploadAsync()
+    {
+        if (_pending is null || string.IsNullOrWhiteSpace(_pendingName))
+            return;
+
+        _uploading = true;
+        _error = null;
+        _notice = null;
+        try
+        {
+            await using var stream = new MemoryStream(_pending, writable: false);
+            var stored = await Service.IngestAsync(_pendingName, stream, _user, CancellationToken.None);
+            _notice = $"Stored {stored.Title}.";
+            _pending = null;
+            _pendingName = null;
+            await ReloadAsync();
+        }
+        catch (DeskInputException ex)
+        {
+            _error = ex.Message;
+        }
+        catch (IOException)
+        {
+            _error = $"That file is larger than {Limits.MaxUploadMegabytes} MB.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Upload failed.");
+            _error = "That file could not be stored.";
+        }
+        finally
+        {
+            _uploading = false;
+        }
+    }
+
+    private async Task RemoveAsync(Guid documentId)
+    {
+        _error = null;
+        try
+        {
+            await Service.DeleteAsync(documentId, CancellationToken.None);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Remove failed for {DocumentId}.", documentId);
+            _error = "That document could not be removed.";
+        }
+    }
+
+    private async Task AskAsync()
+    {
+        _asking = true;
+        _result = null;
+        _error = null;
+        try
+        {
+            _result = await Service.AskAsync(_question, CancellationToken.None);
+        }
+        catch (DeskInputException ex)
+        {
+            _error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Ask failed.");
+            _error = "The question could not be answered.";
+        }
+        finally
+        {
+            _asking = false;
+        }
+    }
+
+    private async Task ReloadAsync()
+    {
+        _documents.Clear();
+        _documents.AddRange(await Service.ListAsync(CancellationToken.None));
+    }
+}

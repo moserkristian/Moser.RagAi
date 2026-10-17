@@ -1,0 +1,12 @@
+Local embedding model
+  Xenova/all-MiniLM-L6-v2 (quantized ONNX)
+  Apache License 2.0
+  Downloaded at build or first run. The weights are not committed.
+
+Nunito
+  SIL Open Font License 1.1
+  wwwroot/fonts/OFL.txt
+
+Layout
+  The screen layout follows a free Magnific vector by pikisuperstar, resource 17723042.
+  The stock download is not in this repository. The free license does not allow redistributing those files.

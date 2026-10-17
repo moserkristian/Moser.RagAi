@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Moser.RagAi.Web</RootNamespace>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Moser.RagAi" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Moser.RagAi.Core\Moser.RagAi.Core.csproj" />
+    <ProjectReference Include="..\Moser.RagAi.Infrastructure\Moser.RagAi.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

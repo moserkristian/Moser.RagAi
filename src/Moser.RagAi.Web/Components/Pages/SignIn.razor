@@ -1,0 +1,44 @@
+@page "/sign-in"
+
+<PageTitle>Sign in</PageTitle>
+
+<section class="auth">
+    <h1>Sign in</h1>
+    <p class="lead">Use the account configured for this desk.</p>
+    @if (!HasUsers)
+    {
+        <p class="status" role="status">No users are configured. Set the desk user environment variables and restart.</p>
+    }
+    @if (Failed)
+    {
+        <p class="alert" role="alert">Those credentials are not valid.</p>
+    }
+    <form method="post" action="/account/sign-in" class="stack" data-enhance="false">
+        <AntiforgeryToken />
+        <input type="hidden" name="returnUrl" value="@ReturnPath.Normalize(ReturnUrl)" />
+        <div class="field">
+            <label for="user-name">User name</label>
+            <input id="user-name" name="userName" autocomplete="username" required />
+        </div>
+        <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required />
+        </div>
+        <button type="submit">Sign in</button>
+    </form>
+</section>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromQuery(Name = "error")]
+    public string? Error { get; set; }
+
+    [Inject]
+    public required IOptions<DeskOptions> Options { get; set; }
+
+    private bool Failed => Error == "1";
+
+    private bool HasUsers => Options.Value.Users.Exists(user => user.IsUsable);
+}

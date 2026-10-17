@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Moser.RagAi.Core/Moser.RagAi.Core.csproj" />
+    <Project Path="src/Moser.RagAi.Infrastructure/Moser.RagAi.Infrastructure.csproj" />
+    <Project Path="src/Moser.RagAi.Web/Moser.RagAi.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Moser.RagAi.Tests/Moser.RagAi.Tests.csproj" />
+  </Folder>
+</Solution>
