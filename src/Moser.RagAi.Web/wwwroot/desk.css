@@ -117,7 +117,16 @@ nav a.active {
   text-underline-offset: 6px;
 }
 
-.account { justify-self: end; }
+.account {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account form { margin: 0; }
+
+.who { font-weight: 800; color: #fff; }
 
 h1 {
   margin: 0;

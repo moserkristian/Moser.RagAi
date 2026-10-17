@@ -20,7 +20,7 @@ $env:GEMINI_API_KEY = "YOUR_KEY"
 dotnet run --project src/Moser.RagAi.Web
 ```
 
-The site listens on http://localhost:5080. Sign in, upload a file from `samples/`, and ask a question.
+The site listens on http://localhost:5080. Sign in, upload a file from `samples/`, and ask a question. Leave both sign-in fields blank to continue as Anonymous. A user name or a password is checked against the configured account.
 
 The first start downloads a local embedding model into `models/` (about 23 MB). That folder is not committed.
 

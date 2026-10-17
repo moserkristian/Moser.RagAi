@@ -174,6 +174,40 @@ public class GeminiGeneratorTests
 public class StaffInputTests
 {
     [Fact]
+    public void Blank_form_signs_in_as_anonymous()
+    {
+        var users = new[] { ("staff", "correct horse") };
+
+        var empty = SignIn.Choose(null, null, users);
+        var spaces = SignIn.Choose("  ", " \t ", users);
+
+        Assert.True(empty.Succeeded);
+        Assert.True(empty.Anonymous);
+        Assert.Equal(SignIn.AnonymousName, empty.Name);
+        Assert.Equal(SignIn.AnonymousName, spaces.Name);
+    }
+
+    [Fact]
+    public void Wrong_password_still_fails()
+    {
+        var users = new[] { ("staff", "correct horse") };
+
+        var wrong = SignIn.Choose("staff", "wrong", users);
+        var onlyPassword = SignIn.Choose("  ", "wrong", users);
+        var onlyName = SignIn.Choose("staff", "   ", users);
+        var right = SignIn.Choose("Staff", "correct horse", users);
+
+        Assert.False(wrong.Succeeded);
+        Assert.False(onlyPassword.Succeeded);
+        Assert.False(onlyPassword.Anonymous);
+        Assert.False(onlyName.Succeeded);
+        Assert.False(onlyName.Anonymous);
+        Assert.True(right.Succeeded);
+        Assert.False(right.Anonymous);
+        Assert.Equal("staff", right.Name);
+    }
+
+    [Fact]
     public void Passwords_match_only_when_both_sides_are_present_and_equal()
     {
         Assert.True(PasswordCompare.Matches("correct horse", "correct horse"));

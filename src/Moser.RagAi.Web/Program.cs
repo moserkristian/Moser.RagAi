@@ -193,19 +193,19 @@ public static class Program
         }
 
         var form = await http.Request.ReadFormAsync(http.RequestAborted);
-        var name = form["userName"].ToString().Trim();
-        var password = form["password"].ToString();
         var returnUrl = ReturnPath.Normalize(form["returnUrl"].ToString());
-        var user = options.Value.Users.FirstOrDefault(candidate =>
-            candidate.IsUsable && string.Equals(candidate.UserName, name, StringComparison.OrdinalIgnoreCase));
-        if (user is null || !PasswordCompare.Matches(user.Password, password))
+        var choice = SignIn.Choose(
+            form["userName"].ToString(),
+            form["password"].ToString(),
+            options.Value.Users.Select(user => (user.UserName, user.Password)));
+        if (!choice.Succeeded)
         {
             http.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("SignIn").LogWarning("Sign-in failed.");
             return Results.Redirect($"/sign-in?error=1&ReturnUrl={Uri.EscapeDataString(returnUrl)}");
         }
 
         var identity = new ClaimsIdentity(
-            [new Claim(ClaimTypes.Name, user.UserName)],
+            [new Claim(ClaimTypes.Name, choice.Name)],
             CookieAuthenticationDefaults.AuthenticationScheme);
         await http.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
         return Results.Redirect(returnUrl);

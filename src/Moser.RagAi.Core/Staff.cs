@@ -16,6 +16,35 @@ public static class PasswordCompare
     }
 }
 
+public readonly record struct SignInChoice(bool Succeeded, bool Anonymous, string Name);
+
+public static class SignIn
+{
+    public const string AnonymousName = "Anonymous";
+
+    public static SignInChoice Choose(string? userName, string? password, IEnumerable<(string UserName, string Password)> users)
+    {
+        if (string.IsNullOrWhiteSpace(userName) && string.IsNullOrWhiteSpace(password))
+            return new SignInChoice(true, true, AnonymousName);
+
+        var name = userName?.Trim() ?? "";
+        var provided = password ?? "";
+        foreach (var user in users)
+        {
+            if (string.IsNullOrWhiteSpace(user.UserName) || user.Password.Length == 0)
+                continue;
+            if (!string.Equals(user.UserName, name, StringComparison.OrdinalIgnoreCase))
+                continue;
+            if (!PasswordCompare.Matches(user.Password, provided))
+                return new SignInChoice(false, false, "");
+
+            return new SignInChoice(true, false, user.UserName);
+        }
+
+        return new SignInChoice(false, false, "");
+    }
+}
+
 public static class ReturnPath
 {
     public static string Normalize(string? value)

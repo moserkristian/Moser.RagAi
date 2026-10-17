@@ -12,6 +12,7 @@
             <div class="account">
                 <AuthorizeView>
                     <Authorized>
+                        <span class="who">@context.User.Identity?.Name</span>
                         <form method="post" action="/account/sign-out" data-enhance="false">
                             <AntiforgeryToken />
                             <button type="submit">Sign out</button>

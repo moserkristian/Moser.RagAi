@@ -4,7 +4,7 @@
 
 <section class="auth">
     <h1>Sign in</h1>
-    <p class="lead">Use the account configured for this desk.</p>
+    <p class="lead">Leave both fields blank to sign in as Anonymous. Otherwise use the configured account.</p>
     @if (!HasUsers)
     {
         <p class="status" role="status">No users are configured. Set the desk user environment variables and restart.</p>
@@ -13,16 +13,16 @@
     {
         <p class="alert" role="alert">Those credentials are not valid.</p>
     }
-    <form method="post" action="/account/sign-in" class="stack" data-enhance="false">
+    <form method="post" action="/account/sign-in" class="stack" data-enhance="false" novalidate>
         <AntiforgeryToken />
         <input type="hidden" name="returnUrl" value="@ReturnPath.Normalize(ReturnUrl)" />
         <div class="field">
             <label for="user-name">User name</label>
-            <input id="user-name" name="userName" autocomplete="username" required />
+            <input id="user-name" name="userName" autocomplete="username" />
         </div>
         <div class="field">
             <label for="password">Password</label>
-            <input id="password" name="password" type="password" autocomplete="current-password" required />
+            <input id="password" name="password" type="password" autocomplete="current-password" />
         </div>
         <button type="submit">Sign in</button>
     </form>
